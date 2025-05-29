@@ -7,6 +7,8 @@ API_AGENT_URL = "http://localhost:8001/stock_info"
 SCRAPING_AGENT_URL = "http://localhost:8002/earnings_summary"
 RETRIEVER_AGENT_URL = "http://localhost:8005/retrieve"
 ANALYTICS_AGENT_URL = "http://localhost:8006/analyze"
+LANGUAGE_AGENT_URL = "http://localhost:8004/generate_summary"
+
 
 ASIA_TECH_TICKERS = ["TSM", "INFY", "SSNLF"]
 

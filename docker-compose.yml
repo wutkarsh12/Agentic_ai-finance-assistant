@@ -1,0 +1,14 @@
+version: '3.9'
+services:
+  finance_app:
+    build: .
+    ports:
+      - "8501:8501"   # Streamlit
+      - "8001:8001"   # API agent
+      - "8002:8002"   # Scraping agent
+      - "8003:8003"   # Orchestrator
+      - "8004:8004"   # Language agent
+      - "8005:8005"   # Retriever
+      - "8006:8006"   # Analytics
+    env_file:
+      - .env
