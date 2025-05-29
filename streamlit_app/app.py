@@ -11,7 +11,7 @@ if st.button("Run Morning Brief"):
 
         try:
             # 1. Call orchestrator agent
-            orchestrated_data = requests.get("http://localhost:8003/morning_brief").json()
+            orchestrated_data = requests.get("http://0.0.0.0:8003/morning_brief").json()
 
             # 2. Call language agent (Gemini)
             response = requests.post("http://localhost:8004/generate_summary", json=orchestrated_data)

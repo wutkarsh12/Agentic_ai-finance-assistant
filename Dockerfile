@@ -19,4 +19,5 @@ RUN pip install -r requirements.txt
 EXPOSE 8001 8002 8003 8004 8005 8006 8501
 
 # Use gunicorn for orchestrator, Streamlit runs separately
-CMD ["sh", "-c", "uvicorn orchestrator.main:app --host 0.0.0.0 --port 8003 & streamlit run streamlit_app/app.py --server.port=8501"]
+CMD ["sh", "-c", "uvicorn orchestrator.main:app --host 0.0.0.0 --port 8003 & streamlit run streamlit_app/app.py --server.port=8501 --server.address=0.0.0.0"]
+
