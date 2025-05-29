@@ -4,7 +4,7 @@ This document logs all AI tool usage, model parameters, and code generations.
 
 ---
 
-## 📊 LLM Model Configuration
+##  LLM Model Configuration
 
 ### Model Used:
 
@@ -23,7 +23,7 @@ model = genai.GenerativeModel(model_name="models/gemini-1.5-flash-latest")
 
 ---
 
-## 🔢 Sample Prompt to Gemini
+##  Sample Prompt to Gemini
 
 ### Input Prompt:
 
@@ -33,10 +33,10 @@ Earnings events:
 TSMC beat estimates by 4%
 Samsung missed by 2%
 
-📄 Context:
+ Context:
 TSMC reported revenue growth of 14% year-over-year in Q1 2024...
 
-📊 Market Summary:
+ Market Summary:
 TSMC closed at $197.67, previous: $191.98. Earnings: ...
 INFY closed at $18.36, previous: $18.48. Earnings: ...
 ```
@@ -47,7 +47,7 @@ INFY closed at $18.36, previous: $18.48. Earnings: ...
 
 ---
 
-## ⚖️ Toolkits Used
+##  Toolkits Used
 
 | Purpose         | Library               |
 | --------------- | --------------------- |
@@ -61,7 +61,7 @@ INFY closed at $18.36, previous: $18.48. Earnings: ...
 
 ---
 
-## 🛠️ Prompt Engineering Steps
+##  Prompt Engineering Steps
 
 * Designed prompt for clarity and spoken tone.
 * Combined analytics + raw data + RAG context.
@@ -69,7 +69,7 @@ INFY closed at $18.36, previous: $18.48. Earnings: ...
 
 ---
 
-## 📚 Model Behavior
+##  Model Behavior
 
 * Gemini 1.5 Flash responds consistently within \~1–2 seconds.
 * Handles multi-paragraph prompts well.
@@ -86,7 +86,7 @@ INFY closed at $18.36, previous: $18.48. Earnings: ...
 
 ---
 
-## 📅 Session Timeline
+##  Session Timeline
 
 | Date    | Tool Used        | Action                            |
 | ------- | ---------------- | --------------------------------- |
