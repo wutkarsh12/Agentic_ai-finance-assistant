@@ -112,6 +112,4 @@ MIT License
 
 ## ✍️ Credits
 
-Built as part of the Agents Internship Assignment.
-
 > Reach out if you want help deploying or debugging!
