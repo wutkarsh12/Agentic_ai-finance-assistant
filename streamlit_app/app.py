@@ -5,15 +5,12 @@ import pyttsx3
 st.set_page_config(page_title="AI Market Brief", layout="centered")
 st.title("Asia Tech Morning Brief")
 
-# UI Button
 if st.button("Run Morning Brief"):
     with st.spinner("Collecting data from agents..."):
 
         try:
-            # 1. Call orchestrator agent
-            orchestrated_data = requests.get("http://0.0.0.0:8003/morning_brief").json()
-
-            # 2. Call language agent (Gemini)
+            # ✅ Fix: Use localhost for requests
+            orchestrated_data = requests.get("http://localhost:8003/morning_brief").json()
             response = requests.post("http://localhost:8004/generate_summary", json=orchestrated_data)
             result = response.json()
             summary = result.get("summary")
@@ -22,7 +19,7 @@ if st.button("Run Morning Brief"):
                 st.success("Summary generated!")
                 st.markdown(f"**Summary:**\n\n{summary}")
 
-                # 3. Speak the summary
+                # Optional voice
                 engine = pyttsx3.init()
                 engine.setProperty('rate', 160)
                 engine.say(summary)
@@ -32,3 +29,4 @@ if st.button("Run Morning Brief"):
 
         except Exception as e:
             st.error(f"Error: {str(e)}")
+

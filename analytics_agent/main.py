@@ -9,7 +9,7 @@ ASIA_TECH_ALLOC = {
     "SSNLF": 50_000_000
 }
 
-@app.post("/analyze")  # ✅ MUST be POST
+@app.post("/analyze") 
 async def analyze(request: Request):
     data = await request.json()
     asia_data = data.get("asia_tech_brief", [])
