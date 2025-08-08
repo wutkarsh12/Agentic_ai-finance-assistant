@@ -1,0 +1,287 @@
+{
+  "rootDirectory": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project",
+  "timestamp": "2025-08-08T08:43:26.845Z",
+  "files": [
+    {
+      "path": ".env.example",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\.env.example",
+      "name": ".env.example",
+      "extension": ".example",
+      "size": 55,
+      "created": "2025-05-29T10:47:45.632Z",
+      "modified": "2025-05-29T10:48:05.370Z",
+      "content": "# .env.example\nGOOGLE_API_KEY=your_google_api_key_here\n",
+      "lines": 3,
+      "isText": false
+    },
+    {
+      "path": ".gitignore",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\.gitignore",
+      "name": ".gitignore",
+      "extension": "",
+      "size": 205,
+      "created": "2025-05-29T11:09:50.570Z",
+      "modified": "2025-05-29T11:28:41.855Z",
+      "content": "# Python virtual environment\r\nvenv/\r\n\r\n# Environment variables\r\n.env\r\n\r\n# Python cache\r\n__pycache__/\r\n*.pyc\r\n\r\n# Model and large files (optional)\r\n*.pt\r\n*.bin\r\n*.pkl\r\n\r\n# OS files\r\n.DS_Store\r\nThumbs.db\r\n\r\n",
+      "lines": 20,
+      "isText": false
+    },
+    {
+      "path": "analytics_agent\\main.py",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\analytics_agent\\main.py",
+      "name": "main.py",
+      "extension": ".py",
+      "size": 1584,
+      "created": "2025-05-29T06:39:55.338Z",
+      "modified": "2025-08-03T05:17:22.576Z",
+      "content": "from fastapi import FastAPI, Request\r\n\r\napp = FastAPI()\r\n\r\nAUM_TOTAL = 1_000_000_000  # $1B\r\nASIA_TECH_ALLOC = {\r\n    \"TSM\": 220_000_000,\r\n    \"INFY\": 80_000_000,\r\n    \"SSNLF\": 50_000_000\r\n}\r\n\r\n@app.post(\"/analyze\") \r\nasync def analyze(request: Request):\r\n    data = await request.json()\r\n    asia_data = data.get(\"asia_tech_brief\", [])\r\n\r\n    # 1. Exposure Calculation\r\n    exposure_usd = sum(ASIA_TECH_ALLOC.values())\r\n    exposure_percent = round((exposure_usd / AUM_TOTAL) * 100, 2)\r\n\r\n    # 2. Earnings Surprise Detection\r\n    surprises = []\r\n    for item in asia_data:\r\n        ticker = item.get(\"ticker\")\r\n        summary = item.get(\"earnings_summary\", \"\")\r\n\r\n        try:\r\n            if \"Avg. Estimate\" in summary and \"Year Ago EPS\" in summary:\r\n                parts = summary.split(\"Avg. Estimate\")[1]\r\n                estimate = float(parts.split()[0])\r\n\r\n                parts2 = summary.split(\"Year Ago EPS\")[1]\r\n                actual = float(parts2.split()[0])\r\n\r\n                diff = round(((actual - estimate) / estimate) * 100, 2)\r\n                if diff >= 1:\r\n                    surprises.append(f\"{ticker} beat estimates by {diff}%\")\r\n                elif diff <= -1:\r\n                    surprises.append(f\"{ticker} missed estimates by {abs(diff)}%\")\r\n            else:\r\n                surprises.append(f\"{ticker}: insufficient earnings data\")\r\n        except Exception as e:\r\n            surprises.append(f\"{ticker}: error parsing data\")\r\n\r\n    return {\r\n        \"asia_exposure_percent\": exposure_percent,\r\n        \"earnings_surprises\": surprises\r\n    }\r\n",
+      "lines": 49,
+      "isText": true
+    },
+    {
+      "path": "check_models.py",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\check_models.py",
+      "name": "check_models.py",
+      "extension": ".py",
+      "size": 320,
+      "created": "2025-05-28T18:35:15.340Z",
+      "modified": "2025-05-28T18:35:24.142Z",
+      "content": "import google.generativeai as genai\r\nimport os\r\nfrom dotenv import load_dotenv\r\n\r\nload_dotenv()\r\ngenai.configure(api_key=os.getenv(\"GOOGLE_API_KEY\"))\r\n\r\nprint(\"🔍 Listing available models...\\n\")\r\nfor model in genai.list_models():\r\n    print(f\"Model name: {model.name}, methods: {model.supported_generation_methods}\")\r\n",
+      "lines": 11,
+      "isText": true
+    },
+    {
+      "path": "data_ingestion\\api_agent\\main.py",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\data_ingestion\\api_agent\\main.py",
+      "name": "main.py",
+      "extension": ".py",
+      "size": 425,
+      "created": "2025-05-28T06:12:39.435Z",
+      "modified": "2025-05-28T06:13:00.421Z",
+      "content": "from fastapi import FastAPI\r\nimport yfinance as yf\r\n\r\napp = FastAPI()\r\n\r\n@app.get(\"/stock_info\")\r\ndef get_stock_info(ticker: str):\r\n    stock = yf.Ticker(ticker)\r\n    hist = stock.history(period=\"2d\")\r\n    \r\n    if hist.empty:\r\n        return {\"error\": \"No data found for ticker\"}\r\n    \r\n    return {\r\n        \"ticker\": ticker,\r\n        \"latest_close\": hist['Close'][-1],\r\n        \"previous_close\": hist['Close'][-2]\r\n    }\r\n",
+      "lines": 19,
+      "isText": true
+    },
+    {
+      "path": "data_ingestion\\scraping_agent\\main.py",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\data_ingestion\\scraping_agent\\main.py",
+      "name": "main.py",
+      "extension": ".py",
+      "size": 826,
+      "created": "2025-05-28T06:23:10.623Z",
+      "modified": "2025-05-28T06:23:20.209Z",
+      "content": "from fastapi import FastAPI\r\nimport requests\r\nfrom bs4 import BeautifulSoup\r\n\r\napp = FastAPI()\r\n\r\n@app.get(\"/earnings_summary\")\r\ndef get_earnings_summary(ticker: str):\r\n    url = f\"https://finance.yahoo.com/quote/{ticker}/analysis\"\r\n    headers = {\r\n        \"User-Agent\": \"Mozilla/5.0\"\r\n    }\r\n\r\n    try:\r\n        response = requests.get(url, headers=headers)\r\n        soup = BeautifulSoup(response.text, 'html.parser')\r\n\r\n        # Find earnings estimate table\r\n        tables = soup.find_all(\"table\")\r\n        if not tables:\r\n            return {\"error\": \"No earnings data found\"}\r\n\r\n        # Just return the first table's text as a demo\r\n        return {\r\n            \"ticker\": ticker,\r\n            \"earnings_table_snippet\": tables[0].get_text()\r\n        }\r\n\r\n    except Exception as e:\r\n        return {\"error\": str(e)}\r\n",
+      "lines": 31,
+      "isText": true
+    },
+    {
+      "path": "docker-compose.yml",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\docker-compose.yml",
+      "name": "docker-compose.yml",
+      "extension": ".yml",
+      "size": 356,
+      "created": "2025-05-29T12:39:26.564Z",
+      "modified": "2025-05-29T12:39:32.575Z",
+      "content": "version: '3.9'\r\nservices:\r\n  finance_app:\r\n    build: .\r\n    ports:\r\n      - \"8501:8501\"   # Streamlit\r\n      - \"8001:8001\"   # API agent\r\n      - \"8002:8002\"   # Scraping agent\r\n      - \"8003:8003\"   # Orchestrator\r\n      - \"8004:8004\"   # Language agent\r\n      - \"8005:8005\"   # Retriever\r\n      - \"8006:8006\"   # Analytics\r\n    env_file:\r\n      - .env\r\n",
+      "lines": 15,
+      "isText": true
+    },
+    {
+      "path": "Dockerfile",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\Dockerfile",
+      "name": "Dockerfile",
+      "extension": "",
+      "size": 621,
+      "created": "2025-05-29T12:38:45.199Z",
+      "modified": "2025-05-29T14:23:05.040Z",
+      "content": "# Use official Python image\r\nFROM python:3.10-slim\r\n\r\n# Set environment variables\r\nENV PYTHONDONTWRITEBYTECODE=1\r\nENV PYTHONUNBUFFERED=1\r\n\r\n# Set working directory\r\nWORKDIR /app\r\n\r\n# Copy files\r\nCOPY . .\r\n\r\n# Install dependencies\r\nRUN pip install --upgrade pip\r\nRUN pip install -r requirements.txt\r\n\r\n# Expose ports for all services (if testing locally)\r\nEXPOSE 8001 8002 8003 8004 8005 8006 8501\r\n\r\n# Use gunicorn for orchestrator, Streamlit runs separately\r\nCMD [\"sh\", \"-c\", \"uvicorn orchestrator.main:app --host 0.0.0.0 --port 8003 & streamlit run streamlit_app/app.py --server.port=8501 --server.address=0.0.0.0\"]\r\n\r\n",
+      "lines": 24,
+      "isText": false
+    },
+    {
+      "path": "docs\\ai_tool_usage.md",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\docs\\ai_tool_usage.md",
+      "name": "ai_tool_usage.md",
+      "extension": ".md",
+      "size": 2780,
+      "created": "2025-05-29T15:59:28.209Z",
+      "modified": "2025-05-29T16:00:21.589Z",
+      "content": "# AI Tool Usage Log (ai\\_tool\\_usage.md)\r\n\r\nThis document logs all AI tool usage, model parameters, and code generations.\r\n\r\n---\r\n\r\n##  LLM Model Configuration\r\n\r\n### Model Used:\r\n\r\n* **Google Gemini**\r\n* **Model name**: `models/gemini-1.5-flash-latest`\r\n\r\n### Configuration:\r\n\r\n```python\r\nimport google.generativeai as genai\r\nfrom dotenv import load_dotenv\r\nload_dotenv()\r\ngenai.configure(api_key=os.getenv(\"GOOGLE_API_KEY\"))\r\nmodel = genai.GenerativeModel(model_name=\"models/gemini-1.5-flash-latest\")\r\n```\r\n\r\n---\r\n\r\n##  Sample Prompt to Gemini\r\n\r\n### Input Prompt:\r\n\r\n```text\r\nToday, Asia tech exposure is 22% of AUM.\r\nEarnings events:\r\nTSMC beat estimates by 4%\r\nSamsung missed by 2%\r\n\r\n Context:\r\nTSMC reported revenue growth of 14% year-over-year in Q1 2024...\r\n\r\n Market Summary:\r\nTSMC closed at $197.67, previous: $191.98. Earnings: ...\r\nINFY closed at $18.36, previous: $18.48. Earnings: ...\r\n```\r\n\r\n### Output Summary:\r\n\r\n> Good morning. TSMC closed slightly up. Analyst estimates for the year are around \\$9.24. INFY closed down slightly. Earnings estimate is around \\$0.79.\r\n\r\n---\r\n\r\n##  Toolkits Used\r\n\r\n| Purpose         | Library               |\r\n| --------------- | --------------------- |\r\n| API creation    | FastAPI               |\r\n| Embedding       | sentence-transformers |\r\n| Vector indexing | FAISS                 |\r\n| Voice synthesis | pyttsx3               |\r\n| LLM API         | google-generativeai   |\r\n| Prompt config   | dotenv                |\r\n| UI frontend     | Streamlit             |\r\n\r\n---\r\n\r\n##  Prompt Engineering Steps\r\n\r\n* Designed prompt for clarity and spoken tone.\r\n* Combined analytics + raw data + RAG context.\r\n* Validated LLM summary correctness vs input.\r\n\r\n---\r\n\r\n##  Model Behavior\r\n\r\n* Gemini 1.5 Flash responds consistently within \\~1–2 seconds.\r\n* Handles multi-paragraph prompts well.\r\n* Summary tone is professional and conversational.\r\n\r\n---\r\n\r\n## 🔧 Code Generated by Gemini\r\n\r\n* `test_language.py` structure\r\n* Earnings parsing logic\r\n* Summary prompt formatting\r\n* FastAPI boilerplate for retriever/analytics\r\n\r\n---\r\n\r\n##  Session Timeline\r\n\r\n| Date    | Tool Used        | Action                            |\r\n| ------- | ---------------- | --------------------------------- |\r\n| Day 1-2 | API Agent        | AlphaVantage + YahooFinance fetch |\r\n| Day 3-4 | Scraping Agent   | Earnings table snippet extraction |\r\n| Day 5-6 | Retriever Agent  | FAISS + .txt document ingestion   |\r\n| Day 7   | Language Agent   | Gemini integration + summary      |\r\n| Day 8   | Analytics Agent  | AUM exposure & earnings logic     |\r\n| Day 9   | Streamlit Deploy | End-to-end integration + TTS      |\r\n\r\n---\r\n\r\n> This log meets the audit requirement for AI model/tool usage. Update during submission if additional tools are used.\r\n",
+      "lines": 103,
+      "isText": true
+    },
+    {
+      "path": "language_agent\\main.py",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\language_agent\\main.py",
+      "name": "main.py",
+      "extension": ".py",
+      "size": 1741,
+      "created": "2025-05-28T11:17:03.874Z",
+      "modified": "2025-05-29T07:08:00.374Z",
+      "content": "import os\r\nimport google.generativeai as genai\r\nfrom dotenv import load_dotenv\r\nfrom fastapi import FastAPI, Request\r\n\r\napp = FastAPI()\r\n\r\nload_dotenv()\r\ngenai.configure(api_key=os.getenv(\"GOOGLE_API_KEY\"))\r\n\r\nmodel = genai.GenerativeModel(model_name=\"models/gemini-1.5-flash-latest\")\r\n\r\n@app.post(\"/generate_summary\")\r\nasync def generate_summary(request: Request):\r\n    data = await request.json()\r\n    input_data = data.get(\"asia_tech_brief\", data.get(\"received\", []))\r\n    context = data.get(\"retrieved_context\", [])\r\n    analytics = data.get(\"analytics\", {})\r\n\r\n    if not input_data:\r\n        return {\"error\": \"No data received\"}\r\n\r\n    summary_lines = []\r\n    for item in input_data:\r\n        if \"error\" in item:\r\n            continue\r\n        ticker = item.get(\"ticker\", \"UNKNOWN\")\r\n        market = item.get(\"market_data\", {})\r\n        earnings = item.get(\"earnings_summary\", \"No earnings info.\")\r\n        latest = market.get(\"latest_close\", \"N/A\")\r\n        previous = market.get(\"previous_close\", \"N/A\")\r\n\r\n        summary_lines.append(\r\n            f\"{ticker} closed at {latest}, previous: {previous}. Earnings: {earnings}\"\r\n        )\r\n\r\n    context_text = \"\\n\\n\".join(context)\r\n    exposure = analytics.get(\"asia_exposure_percent\", \"N/A\")\r\n    earnings_events = \"\\n\".join(analytics.get(\"earnings_surprises\", []))\r\n\r\n    prompt = (\r\n        f\"Today, Asia tech exposure is {exposure}% of AUM.\\n\"\r\n        f\"Earnings events:\\n{earnings_events}\\n\\n\"\r\n        f\" Context:\\n{context_text}\\n\\n\"\r\n        f\" Market Summary:\\n\" + \"\\n\".join(summary_lines)\r\n    )\r\n\r\n    try:\r\n        response = model.generate_content(prompt)\r\n        return {\"summary\": response.text.strip()}\r\n    except Exception as e:\r\n        return {\"error\": str(e)}\r\n",
+      "lines": 53,
+      "isText": true
+    },
+    {
+      "path": "orchestrator\\main.py",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\orchestrator\\main.py",
+      "name": "main.py",
+      "extension": ".py",
+      "size": 1976,
+      "created": "2025-05-28T10:54:07.443Z",
+      "modified": "2025-05-29T12:43:53.292Z",
+      "content": "from fastapi import FastAPI\r\nimport requests\r\n\r\napp = FastAPI()\r\n\r\nAPI_AGENT_URL = \"http://localhost:8001/stock_info\"\r\nSCRAPING_AGENT_URL = \"http://localhost:8002/earnings_summary\"\r\nRETRIEVER_AGENT_URL = \"http://localhost:8005/retrieve\"\r\nANALYTICS_AGENT_URL = \"http://localhost:8006/analyze\"\r\nLANGUAGE_AGENT_URL = \"http://localhost:8004/generate_summary\"\r\n\r\n\r\nASIA_TECH_TICKERS = [\"TSM\", \"INFY\", \"SSNLF\"]\r\n\r\n@app.get(\"/morning_brief\")\r\ndef get_morning_brief():\r\n    combined_data = []\r\n\r\n    for ticker in ASIA_TECH_TICKERS:\r\n        try:\r\n            # API agent\r\n            api_resp = requests.get(API_AGENT_URL, params={\"ticker\": ticker})\r\n            api_data = api_resp.json()\r\n\r\n            # Scraping agent\r\n            scrap_resp = requests.get(SCRAPING_AGENT_URL, params={\"ticker\": ticker})\r\n            scrap_data = scrap_resp.json()\r\n\r\n            combined_data.append({\r\n                \"ticker\": ticker,\r\n                \"market_data\": api_data,\r\n                \"earnings_summary\": scrap_data.get(\"earnings_table_snippet\", \"\")\r\n            })\r\n\r\n        except Exception as e:\r\n            combined_data.append({\r\n                \"ticker\": ticker,\r\n                \"error\": str(e)\r\n            })\r\n\r\n    #  Call Retriever Agent\r\n    try:\r\n        retrieval_resp = requests.get(RETRIEVER_AGENT_URL, params={\"query\": \"Asia tech risk and earnings\", \"k\": 3})\r\n        retrieval_data = retrieval_resp.json()\r\n        retrieved_chunks = retrieval_data.get(\"chunks\", [])\r\n    except Exception as e:\r\n        retrieved_chunks = [f\"Retriever error: {e}\"]\r\n\r\n    #  Call Analytics Agent\r\n    try:\r\n        analytics_resp = requests.post(ANALYTICS_AGENT_URL, json={\"asia_tech_brief\": combined_data})\r\n        analytics_data = analytics_resp.json()\r\n    except Exception as e:\r\n        analytics_data = {\"error\": str(e)}\r\n\r\n    return {\r\n        \"asia_tech_brief\": combined_data,\r\n        \"retrieved_context\": retrieved_chunks,\r\n        \"analytics\": analytics_data\r\n    }\r\n",
+      "lines": 61,
+      "isText": true
+    },
+    {
+      "path": "requirements.txt",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\requirements.txt",
+      "name": "requirements.txt",
+      "extension": ".txt",
+      "size": 127,
+      "created": "2025-05-29T10:46:58.443Z",
+      "modified": "2025-05-29T10:48:07.061Z",
+      "content": "fastapi\r\nuvicorn\r\nrequests\r\npython-dotenv\r\ngoogle-generativeai\r\nsentence-transformers\r\nfaiss-cpu\r\npyttsx3\r\nstreamlit\r\nPyMuPDF\r\n",
+      "lines": 11,
+      "isText": true
+    },
+    {
+      "path": "retriever_agent\\data\\asia_tech_market.txt",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\retriever_agent\\data\\asia_tech_market.txt",
+      "name": "asia_tech_market.txt",
+      "extension": ".txt",
+      "size": 221,
+      "created": "2025-05-29T05:52:16.717Z",
+      "modified": "2025-05-29T06:03:52.779Z",
+      "content": "Asia tech stocks opened flat amid concerns over rising US treasury yields. The overall sentiment remains neutral. Key drivers today include earnings reports from TSMC, Infosys, and Samsung. Volatility remains contained.\r\n",
+      "lines": 2,
+      "isText": true
+    },
+    {
+      "path": "retriever_agent\\data\\samsung_q2_2024.txt",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\retriever_agent\\data\\samsung_q2_2024.txt",
+      "name": "samsung_q2_2024.txt",
+      "extension": ".txt",
+      "size": 205,
+      "created": "2025-05-29T05:51:55.311Z",
+      "modified": "2025-05-29T05:52:01.895Z",
+      "content": "Samsung Electronics missed its Q2 2024 earnings estimates by 2%, due to weak memory demand. The company maintains a strong cash position but noted slower-than-expected recovery in the smartphone segment.\r\n",
+      "lines": 2,
+      "isText": true
+    },
+    {
+      "path": "retriever_agent\\data\\tsmc_2024_filing.txt",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\retriever_agent\\data\\tsmc_2024_filing.txt",
+      "name": "tsmc_2024_filing.txt",
+      "extension": ".txt",
+      "size": 239,
+      "created": "2025-05-29T05:50:59.939Z",
+      "modified": "2025-05-29T05:51:07.559Z",
+      "content": "TSMC reported revenue growth of 14% year-over-year in Q1 2024. The company cited AI chip demand as a strong driver. Risk factors include geopolitical tensions with China and rising energy costs. The company beat earnings estimates by 4%.\r\n",
+      "lines": 2,
+      "isText": true
+    },
+    {
+      "path": "retriever_agent\\main.py",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\retriever_agent\\main.py",
+      "name": "main.py",
+      "extension": ".py",
+      "size": 911,
+      "created": "2025-05-29T05:47:44.042Z",
+      "modified": "2025-07-07T05:15:25.891Z",
+      "content": "from fastapi import FastAPI, Query\r\nfrom sentence_transformers import SentenceTransformer\r\nimport faiss\r\nimport os\r\nimport numpy as np\r\n\r\napp = FastAPI()\r\n\r\n# Load model and index\r\nmodel = SentenceTransformer(\"all-MiniLM-L6-v2\")\r\n\r\n# Load documents and index\r\ndocs = []\r\ndoc_dir = os.path.join(os.path.dirname(__file__), \"data\")\r\ndoc_paths = [os.path.join(doc_dir, f) for f in os.listdir(doc_dir) if f.endswith(\".txt\")]\r\nfor path in doc_paths:\r\n    with open(path, \"r\", encoding=\"utf-8\") as file:\r\n        docs.append(file.read())\r\n\r\ndoc_embeddings = model.encode(docs, convert_to_numpy=True)\r\nindex = faiss.IndexFlatL2(doc_embeddings.shape[1])\r\nindex.add(doc_embeddings)\r\n\r\n@app.get(\"/retrieve\")\r\ndef retrieve_top_k(query: str = Query(...), k: int = 2):\r\n    query_vector = model.encode([query])\r\n    D, I = index.search(query_vector, k)\r\n    results = [docs[i] for i in I[0]]\r\n    return {\"chunks\": results}\r\n",
+      "lines": 30,
+      "isText": true
+    },
+    {
+      "path": "streamlit_app\\app.py",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\streamlit_app\\app.py",
+      "name": "app.py",
+      "extension": ".py",
+      "size": 1088,
+      "created": "2025-05-29T04:58:02.321Z",
+      "modified": "2025-07-07T05:15:28.499Z",
+      "content": "import streamlit as st\r\nimport requests\r\nimport pyttsx3\r\n\r\nst.set_page_config(page_title=\"AI Market Brief\", layout=\"centered\")\r\nst.title(\"Asia Tech Morning Brief\")\r\n\r\nif st.button(\"Run Morning Brief\"):\r\n    with st.spinner(\"Collecting data from agents...\"):\r\n\r\n        try:\r\n            # ✅ Fix: Use localhost for requests\r\n            orchestrated_data = requests.get(\"http://localhost:8003/morning_brief\").json()\r\n            response = requests.post(\"http://localhost:8004/generate_summary\", json=orchestrated_data)\r\n            result = response.json()\r\n            summary = result.get(\"summary\")\r\n\r\n            if summary:\r\n                st.success(\"Summary generated!\")\r\n                st.markdown(f\"**Summary:**\\n\\n{summary}\")\r\n\r\n                # Optional voice\r\n                engine = pyttsx3.init()\r\n                engine.setProperty('rate', 160)\r\n                engine.say(summary)\r\n                engine.runAndWait()\r\n            else:\r\n                st.error(\"No summary returned.\")\r\n\r\n        except Exception as e:\r\n            st.error(f\"Error: {str(e)}\")\r\n\r\n",
+      "lines": 33,
+      "isText": true
+    },
+    {
+      "path": "test_language.py",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\test_language.py",
+      "name": "test_language.py",
+      "extension": ".py",
+      "size": 802,
+      "created": "2025-05-28T13:38:31.512Z",
+      "modified": "2025-05-29T04:47:52.434Z",
+      "content": "import requests\r\nimport pyttsx3\r\n\r\n# Step 1: Get orchestrated data\r\norchestrated_data = requests.get(\"http://localhost:8003/morning_brief\").json()\r\n\r\n# Step 2: Send to Gemini-based language agent\r\nresponse = requests.post(\"http://localhost:8004/generate_summary\", json=orchestrated_data)\r\n\r\nprint(\"Status Code:\", response.status_code)\r\nprint(\"Raw Response:\", response.text)\r\n\r\ntry:\r\n    result = response.json()\r\n    summary = result.get(\"summary\")\r\n\r\n    if summary:\r\n        print(\"\\n🧠 Summary:\\n\", summary)\r\n\r\n        # Step 3: Speak it\r\n        print(\"\\n🔊 Speaking summary...\")\r\n        engine = pyttsx3.init()\r\n        engine.say(summary)\r\n        engine.runAndWait()\r\n    else:\r\n        print(\"No summary received.\")\r\nexcept Exception as e:\r\n    print(\"Failed to parse response:\", str(e))\r\n",
+      "lines": 29,
+      "isText": true
+    }
+  ],
+  "directories": [
+    {
+      "path": "analytics_agent",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\analytics_agent",
+      "name": "analytics_agent"
+    },
+    {
+      "path": "data_ingestion",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\data_ingestion",
+      "name": "data_ingestion"
+    },
+    {
+      "path": "data_ingestion\\api_agent",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\data_ingestion\\api_agent",
+      "name": "api_agent"
+    },
+    {
+      "path": "data_ingestion\\scraping_agent",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\data_ingestion\\scraping_agent",
+      "name": "scraping_agent"
+    },
+    {
+      "path": "docs",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\docs",
+      "name": "docs"
+    },
+    {
+      "path": "language_agent",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\language_agent",
+      "name": "language_agent"
+    },
+    {
+      "path": "orchestrator",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\orchestrator",
+      "name": "orchestrator"
+    },
+    {
+      "path": "retriever_agent",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\retriever_agent",
+      "name": "retriever_agent"
+    },
+    {
+      "path": "retriever_agent\\data",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\retriever_agent\\data",
+      "name": "data"
+    },
+    {
+      "path": "streamlit_app",
+      "absolutePath": "c:\\Users\\utkar\\OneDrive\\Desktop\\agents_intern_project\\streamlit_app",
+      "name": "streamlit_app"
+    }
+  ],
+  "summary": {
+    "totalFiles": 18,
+    "totalDirectories": 10,
+    "totalSize": 14482,
+    "fileTypes": {
+      ".example": 1,
+      "no-extension": 2,
+      ".py": 9,
+      ".yml": 1,
+      ".md": 1,
+      ".txt": 4
+    }
+  }
+}
